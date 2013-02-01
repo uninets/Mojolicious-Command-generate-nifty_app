@@ -6,6 +6,8 @@ use Mojo::Base 'Mojolicious::Command';
 use Mojo::Util qw(class_to_path class_to_file);
 use String::Random qw(random_string);
 
+our $VERSION = 0.01;
+
 has description => "Generate Mojolicious application directory structure.\n";
 has usage       => "usage: $0 generate nifty_app [NAME]\n";
 
@@ -545,10 +547,11 @@ L<http://cpanratings.perl.org/d/Mojolicious-Command-generate-nifty_app>
 
 L<http://search.cpan.org/dist/Mojolicious-Command-generate-nifty_app/>
 
+=item * Repository
+
+L<https://github.com/mugenken/Mojolicious-Command-generate-nifty_app/>
+
 =back
-
-
-=head1 ACKNOWLEDGEMENTS
 
 
 =head1 LICENSE AND COPYRIGHT

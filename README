@@ -61,7 +61,11 @@ SUPPORT
         <http://search.cpan.org/dist/Mojolicious-Command-generate-nifty_app/
         >
 
-ACKNOWLEDGEMENTS
+    *   Repository
+
+        <https://github.com/mugenken/Mojolicious-Command-generate-nifty_app/
+        >
+
 LICENSE AND COPYRIGHT
     Copyright 2013 Matthias Krull.
 

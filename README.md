@@ -64,9 +64,9 @@ You can also look for information at:
 
     [http://search.cpan.org/dist/Mojolicious-Command-generate-nifty\_app/](http://search.cpan.org/dist/Mojolicious-Command-generate-nifty\_app/)
 
+- Repository
 
-
-# ACKNOWLEDGEMENTS
+    [https://github.com/mugenken/Mojolicious-Command-generate-nifty\_app/](https://github.com/mugenken/Mojolicious-Command-generate-nifty\_app/)
 
 
 
