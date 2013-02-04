@@ -50,7 +50,7 @@ TODO: {
     "placeholder date/time"       => qr(Date/time)
   );
 
-  module_boilerplate_ok('lib/Mojolicious/Command/generate/dbic_auth_model.pm');
+  module_boilerplate_ok('lib/Mojolicious/Command/generate/nifty_app.pm');
 
 
 }

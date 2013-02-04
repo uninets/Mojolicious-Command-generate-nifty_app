@@ -6,7 +6,7 @@ use Mojo::Base 'Mojolicious::Command';
 use Mojo::Util qw(class_to_path class_to_file);
 use String::Random qw(random_string);
 
-our $VERSION = 0.01;
+our $VERSION = 0.02;
 
 has description => "Generate Mojolicious application directory structure.\n";
 has usage       => "usage: $0 generate nifty_app [NAME]\n";

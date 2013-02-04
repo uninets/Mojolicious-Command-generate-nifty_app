@@ -26,10 +26,10 @@ my $builder = Module::Build->new(
     },
     meta_merge => {
         resources => {
-            repository => 'https://github.com/mugenken/Mojolicious-Command-generate-nifty_app'
+            repository => 'https://github.com/mugenken/Mojolicious-Command-generate-nifty_app.git'
         }
     },
-    add_to_cleanup     => [ 'Mojolicious-Command-generate-nifty_app-* Build _build MYMETA.*' ],
+    add_to_cleanup     => [ 'Mojolicious-Command-generate-nifty_app-* Build _build MYMETA.* Makefile.PL' ],
     create_makefile_pl => 'traditional',
 );
 
