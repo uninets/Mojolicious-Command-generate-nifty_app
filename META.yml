@@ -16,7 +16,7 @@ name: Mojolicious-Command-generate-nifty_app
 provides:
   Mojolicious::Command::generate::nifty_app:
     file: lib/Mojolicious/Command/generate/nifty_app.pm
-    version: 0.01
+    version: 0.02
 requires:
   Crypt::Passwd::XS: 0
   DBIx::Class: 0
@@ -26,5 +26,5 @@ requires:
   YAML: 0
 resources:
   license: http://www.perlfoundation.org/artistic_license_2_0
-  repository: https://github.com/mugenken/Mojolicious-Command-generate-nifty_app
-version: 0.01
+  repository: https://github.com/mugenken/Mojolicious-Command-generate-nifty_app.git
+version: 0.02
