@@ -6,7 +6,7 @@ use Mojo::Base 'Mojolicious::Command';
 use Mojo::Util qw(class_to_path class_to_file);
 use String::Random qw(random_string);
 
-our $VERSION = 0.02;
+our $VERSION = 0.03;
 
 has description => "Generate Mojolicious application directory structure.\n";
 has usage       => "usage: $0 generate nifty_app [NAME]\n";
@@ -38,7 +38,8 @@ sub run {
     $self->render_to_rel_file('welcome_template', "$name/templates/example/welcome.html.ep");
 
     # application class
-    $self->render_to_rel_file('appclass', "$name/lib/$app", $class, $controller_namespace, $model_namespace, random_string('s' x 64));
+    my $model_name = class_to_file $model_namespace;
+    $self->render_to_rel_file('appclass', "$name/lib/$app", $class, $controller_namespace, $model_namespace, $model_name, random_string('s' x 64));
 
     # controllers
     my $example_controller = class_to_path "${controller_namespace}::Example";
@@ -53,7 +54,6 @@ sub run {
     $self->render_to_rel_file('users_model', "$name/lib/$usermodel", $model_namespace);
 
     # db_deploy_script
-    my $model_name = class_to_file $model_namespace;
     $self->render_to_rel_file('db_deploy', "$name/script/deploy_$model_name", $model_namespace, $model_name);
     $self->chmod_file("$name/script/deploy_$model_name", 0744);
 
@@ -62,6 +62,9 @@ sub run {
 
     # config
     $self->render_to_rel_file('config', "$name/config.yml", $model_name);
+
+    # share (to play with DBIx::Class::Migration nicely
+    $self->create_rel_dir("$name/share");
 
     return 1;
 }
@@ -92,6 +95,8 @@ package <%= $class %>;
 use strict;
 use warnings;
 
+our $VERSION = 0.01;
+
 use base 'DBIx::Class::Schema';
 
 __PACKAGE__->load_namespaces;
@@ -102,6 +107,7 @@ __PACKAGE__->load_namespaces;
 % my $class                = shift;
 % my $controller_namespace = shift;
 % my $model_namespace      = shift;
+% my $model_name           = shift;
 % my $secret               = shift;
 package <%= $class %>;
 use Mojo::Base 'Mojolicious';
@@ -117,7 +123,7 @@ sub startup {
     my %config = (
         database => {
             driver => 'SQLite',
-            dbname => 'game_database.sqlite',
+            dbname => 'share/<%= $model_name %>.db',
             dbuser => '',
             dbpass => '',
             dbhost => '',
@@ -230,7 +236,7 @@ use lib 'lib';
 use Getopt::Long;
 use <%= $class %>;
 
-my $db = '<%= $name %>.sqlite';
+my $db = 'share/<%= $name %>.db';
 my $driver = 'SQLite';
 my $user = '';
 my $pass = '';
@@ -470,7 +476,7 @@ done_testing();
 % my $db_name = shift;
 database:
   driver: "SQLite"
-  dbname: "<%= $db_name %>.sqlite"
+  dbname: "share/<%= $db_name %>.db"
   dbuser: ""
   dbhost: ""
   dbpass: ""
