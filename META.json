@@ -38,7 +38,7 @@
    "provides" : {
       "Mojolicious::Command::generate::nifty_app" : {
          "file" : "lib/Mojolicious/Command/generate/nifty_app.pm",
-         "version" : "0.03"
+         "version" : "0.04"
       }
    },
    "release_status" : "stable",
@@ -50,5 +50,5 @@
          "url" : "https://github.com/mugenken/Mojolicious-Command-generate-nifty_app.git"
       }
    },
-   "version" : "0.03"
+   "version" : "0.04"
 }

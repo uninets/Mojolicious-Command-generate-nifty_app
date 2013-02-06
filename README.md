@@ -18,9 +18,24 @@ To generate an app run:
 This will create the directory structure with a default YAML config and basic testing.
 
     cd my_nifty_app
-    script/deploy_my_nifty_app_db
 
-will create the default database and the schema. Default driver is SQLite and the database will be my\_nifty\_app\_db.sqlite for above example.
+To get database version and migration management you should install DBIx::Class::Migration.
+
+If installed you can use script/migration as a thin wrapper around dbic-migration setting lib and the correct database already.
+Running:
+
+    script/migrate prepare
+    script/migrate install
+    script/migrate populate
+
+Will initialize the database according to the config.yml with the data from share/fixtures. So edit those to customize the default user.
+If you do not have and do not want DBIx::Class::Migrate you can initialize the database with:
+
+    script/migrate --init
+
+Now run the test to check if everything went right.
+
+    script/my_nifty_app test
 
 # AUTHOR
 

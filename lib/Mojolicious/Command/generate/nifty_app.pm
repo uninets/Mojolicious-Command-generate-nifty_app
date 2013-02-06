@@ -6,7 +6,7 @@ use Mojo::Base 'Mojolicious::Command';
 use Mojo::Util qw(class_to_path class_to_file);
 use String::Random qw(random_string);
 
-our $VERSION = 0.03;
+our $VERSION = 0.04;
 
 has description => "Generate Mojolicious application directory structure.\n";
 has usage       => "usage: $0 generate nifty_app [NAME]\n";
@@ -54,8 +54,10 @@ sub run {
     $self->render_to_rel_file('users_model', "$name/lib/$usermodel", $model_namespace);
 
     # db_deploy_script
-    $self->render_to_rel_file('db_deploy', "$name/script/deploy_$model_name", $model_namespace, $model_name);
-    $self->chmod_file("$name/script/deploy_$model_name", 0744);
+    $self->render_to_rel_file('migrate', "$name/script/migrate", $model_namespace, $model_name);
+    $self->chmod_file("$name/script/migrate", 0744);
+    $self->render_to_rel_file('fixture', "$name/share/fixtures/0.01/all_tables/users/1.fix");
+    $self->render_to_rel_file('fixture_config', "$name/share/fixtures/0.01/conf/all_tables.json");
 
     # tests
     $self->render_to_rel_file('test', "$name/t/basic.t", $class );
@@ -225,15 +227,16 @@ __PACKAGE__->add_unique_constraint('users_login_key', ['login']);
 
 1;
 
-@@ db_deploy
+@@ migrate
 % my $class = shift;
 % my $name = shift;
 #!/usr/bin/env perl
 
 use strict;
 use warnings;
+use 5.012;
 use lib 'lib';
-use Getopt::Long;
+use Getopt::Long qw(:config pass_through);
 use <%= $class %>;
 
 my $db = 'share/<%= $name %>.db';
@@ -242,6 +245,7 @@ my $user = '';
 my $pass = '';
 my $host = '';
 my $port = 0;
+my $init = 0;
 
 my $result = GetOptions(
     'h|host=s' => \$host,
@@ -250,6 +254,7 @@ my $result = GetOptions(
     'p|pass=s' => \$pass,
     'd|db=s' => \$db,
     'm|driver=s' => \$driver,
+    'init' => \$init,
 );
 
 my $dsn_head = "dbi:$driver:dbname=$db;";
@@ -258,19 +263,58 @@ my $dsn_port = $port ? "port=$port;" : '';
 
 my $dsn = $dsn_head . $dsn_host . $dsn_port;
 
-my $schema = <%= $class %>->connect($dsn, $user, $pass);
-$schema->deploy;
+$ENV{DBIC_MIGRATION_SCHEMA_CLASS} = '<%= $class %>';
 
-# create default user:
-# username: admin
-# password: password
-$schema->resultset('User')->create({
-    login => 'admin',
-    email => 'admin@example.com',
-    password => '$6$salt$IxDD3jeSOb5eB1CX5LBsqZFVkJdido3OUILO5Ifz5iwMuTS4XMS130MTSuDDl3aCI6WouIL9AjRbLCelDCy.g.'
-});
+eval {
+    require DBIx::Class::Migration;
+    DBIx::Class::Migration->import();
+};
 
-exit 0;
+if ($@) {
+    say "Run this script after installing DBIx::Class::Migration for database version management.";
+    unless ($init) {
+        say "To initialize the database anyway run ${0} --init";
+        exit 1;
+    }
+
+    require <%= $class %>;
+    <%= $class %>->import();
+    my $schema = <%= $class %>->connect($dsn, $user, $pass);
+    $schema->deploy;
+    my $admin = do 'share/fixtures/0.01/all_tables/users/1.fix';
+    $schema->resultset('User')->create($admin);
+}
+else {
+    unshift @ARGV, ('--dsn', $dsn, '--username', $user, '--password', $pass);
+    (require DBIx::Class::Migration::Script)->run_with_options;
+}
+
+@@ fixture
+$HASH1 = {
+           email    => 'admin@example.com',
+           id       => 1,
+           login    => 'admin',
+           password => '$6$salt$IxDD3jeSOb5eB1CX5LBsqZFVkJdido3OUILO5Ifz5iwMuTS4XMS130MTSuDDl3aCI6WouIL9AjRbLCelDCy.g.'
+         };
+
+@@ fixture_config
+{
+   "sets" : [
+      {
+         "quantity" : "all",
+         "class" : "User"
+      }
+   ],
+   "might_have" : {
+      "fetch" : 0
+   },
+   "belongs_to" : {
+      "fetch" : 0
+   },
+   "has_many" : {
+      "fetch" : 0
+   }
+}
 
 @@ login_form
 %% layout 'nifty';
@@ -509,9 +553,24 @@ To generate an app run:
 This will create the directory structure with a default YAML config and basic testing.
 
     cd my_nifty_app
-    script/deploy_my_nifty_app_db
 
-will create the default database and the schema. Default driver is SQLite and the database will be my_nifty_app_db.sqlite for above example.
+To get database version and migration management you should install DBIx::Class::Migration.
+
+If installed you can use script/migration as a thin wrapper around dbic-migration setting lib and the correct database already.
+Running:
+
+    script/migrate prepare
+    script/migrate install
+    script/migrate populate
+
+Will initialize the database according to the config.yml with the data from share/fixtures. So edit those to customize the default user.
+If you do not have and do not want DBIx::Class::Migrate you can initialize the database with:
+
+    script/migrate --init
+
+Now run the test to check if everything went right.
+
+    script/my_nifty_app test
 
 =head1 AUTHOR
 
